@@ -103,7 +103,12 @@ impl FsSource {
                 let p = entry.path();
                 let name = entry.file_name().to_string_lossy().to_string();
                 if p.is_dir() {
-                    if name == "target" || name.starts_with('.') {
+                    // Skip only dotted dirs (.git, ...). Do NOT skip `target/`: the
+                    // openFPGA build convention puts generated PLLs under
+                    // `target/pocket/<pll>/<pll>.v`, so skipping it would miss real
+                    // PLL modules and falsely flag them as phantom (Lint A). We scan
+                    // FPGA cores, not Rust crates, so a `target/` here is core RTL.
+                    if name.starts_with('.') {
                         continue;
                     }
                     stack.push(p);
@@ -151,6 +156,27 @@ mod tests {
         assert!(SourceFile::new("rtl/top.sv", "").is_rtl());
         assert!(!SourceFile::new("readme.md", "").is_rtl());
         assert!(!SourceFile::new("readme.md", "").is_sdc());
+    }
+
+    #[test]
+    fn fs_source_scans_pll_under_target_pocket() {
+        // Regression (real opengateware core): generated PLLs ship at
+        // target/pocket/<pll>/<pll>.v. FsSource must collect them — skipping
+        // `target/` (a Rust-ism) missed core_pll and falsely flagged it phantom.
+        let dir = std::env::temp_dir().join(format!("cdc-fssrc-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let pll = dir.join("target/pocket/core_pll");
+        std::fs::create_dir_all(&pll).unwrap();
+        std::fs::write(pll.join("core_pll.v"), "module core_pll(); endmodule").unwrap();
+        std::fs::write(dir.join("core.sdc"), "set_clock_groups -asynchronous -group {core_pll}")
+            .unwrap();
+        let src = FsSource::open(&dir).unwrap();
+        let paths: Vec<String> = src.files().iter().map(|f| f.path.clone()).collect();
+        assert!(
+            paths.iter().any(|p| p.contains("target/pocket/core_pll/core_pll.v")),
+            "a PLL under target/pocket/ must be scanned: {paths:?}"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
