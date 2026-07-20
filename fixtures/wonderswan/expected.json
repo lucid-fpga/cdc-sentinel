@@ -1,0 +1,10 @@
+{
+  "core": "agg23/openfpga-wonderswan@073213a",
+  "provenance": "synthesized reproduction of the 31-core clock/PLL/CDC survey classification; no vendor RTL copied",
+  "blanket_async": true,
+  "external_memory": true,
+  "added_timing": false,
+  "phantom": [],
+  "lint_a": false,
+  "lint_b": true
+}

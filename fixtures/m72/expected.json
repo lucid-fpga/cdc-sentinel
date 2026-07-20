@@ -1,0 +1,13 @@
+{
+  "core": "opengateware/arcade-irem_m72@26ed33f",
+  "provenance": "synthesized reproduction of the 31-core clock/PLL/CDC survey classification; no vendor RTL copied",
+  "blanket_async": true,
+  "external_memory": true,
+  "added_timing": true,
+  "phantom": [
+    "sdram_pll",
+    "video_pll"
+  ],
+  "lint_a": true,
+  "lint_b": false
+}

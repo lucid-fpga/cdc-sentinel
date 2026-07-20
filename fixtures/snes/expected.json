@@ -1,0 +1,12 @@
+{
+  "core": "agg23/openfpga-SNES@70d5a65",
+  "provenance": "synthesized reproduction of the 31-core clock/PLL/CDC survey classification; no vendor RTL copied",
+  "blanket_async": true,
+  "external_memory": true,
+  "added_timing": true,
+  "phantom": [
+    "audio_pll"
+  ],
+  "lint_a": true,
+  "lint_b": false
+}

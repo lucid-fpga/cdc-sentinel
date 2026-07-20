@@ -1,0 +1,10 @@
+{
+  "core": "opengateware/arcade-galaga@c6f48e9",
+  "provenance": "synthesized reproduction of the 31-core clock/PLL/CDC survey classification; no vendor RTL copied",
+  "blanket_async": true,
+  "external_memory": false,
+  "added_timing": false,
+  "phantom": [],
+  "lint_a": false,
+  "lint_b": false
+}
