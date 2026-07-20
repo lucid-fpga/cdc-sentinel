@@ -57,11 +57,37 @@ public API is not stable.
   ingested as a downstream tool's "CDC hotspots" — severity, the offending
   clock/line, the reason, and a pointer to the fix a later version would write.
 
+## Fixing (`--fix`) — with an honesty guardrail
+
+`--fix` turns detection into correction, but the two lints have very different fix
+confidences, and cdc-sentinel refuses to blur them:
+
+- **Lint A (phantom) is safely auto-fixed.** Removing a `-group {}` that names only a
+  clock the design never instantiates deletes a no-op line and changes nothing real.
+  `--fix` emits the corrected SDC — **byte-identical except the dead member is gone**.
+- **Lint B (real crossing) is NOT auto-fixed.** The correct multicycle/false-path
+  value depends on the actual timing relationship, which a heuristic scan does not
+  know. cdc-sentinel **never emits a specific value as if correct** — it appends a
+  clearly-marked **UNVERIFIED** guided suggestion: a *commented* constraint template
+  with `<CORE_CLK>` / `<MEM_CLK>` / `<N>` placeholders and a "set the value and
+  confirm in STA" banner. A confidently-wrong constraint is the one output we refuse.
+
+The user's SDC is **never overwritten** — corrections go to a new `*.fixed.sdc` file
+unless you pass `--in-place`.
+
+`--emit-template-patch` produces the single upstream fix: a proposed patch against the
+openFPGA core-template's `core_constraints.sdc` (the root every core inherits the
+blanket cut from) that replaces it with a documented scaffold + a per-core TODO, plus
+a proposed PR body. cdc-sentinel **does not open the PR** — that is for a maintainer
+to review and submit.
+
 ## Testing
 
 ```
-cargo test          # unit tests (in-memory doubles) + the fixture-corpus validation
-cargo run -- <dir>  # lint a core directory; --json for machine-readable findings
+cargo test                        # unit tests + the fixture-corpus lint & fix validation
+cargo run -- <dir>                # lint a core directory (--json for machine-readable)
+cargo run -- --fix <dir>          # emit corrected SDC + UNVERIFIED crossing suggestions
+cargo run -- --emit-template-patch  # the upstream root fix (patch + PR body)
 ```
 
 ## License

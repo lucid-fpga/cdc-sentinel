@@ -48,13 +48,17 @@
 
 pub mod design;
 pub mod error;
+pub mod fix;
 pub mod lint;
+pub mod patch;
 pub mod report;
 pub mod sdc;
 pub mod source;
 
 pub use design::{scan_design, DesignModel, MemController, MemKind};
 pub use error::{Error, Result};
+pub use fix::{plan_fix, plan_fix_models, CrossingSuggestion, FixPlan, FixedFile};
 pub use lint::{analyze, analyze_models, CoreReport, Finding, Lint, Severity, Summary};
+pub use patch::{emit_template_patch, TemplatePatch};
 pub use sdc::{parse_sdc, DatapathKind, SdcModel};
 pub use source::{CoreSource, FsSource, MemSource, SourceFile};
